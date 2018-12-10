@@ -1,0 +1,43 @@
+﻿@model CornerStoneApril30.Models.TripAssignment
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h2>Edit</h2>
+
+<h4>TripAssignment</h4>
+<hr />
+<div class="row">
+    <div class="col-md-12">
+
+        <form asp-action="Edit" class="col-md-4">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="ID" />
+            <input type="hidden" asp-for="StudentID" />
+            <input type="hidden" asp-for="TripID" />
+            <div class="form-group">
+                <label asp-for="StatusOfPickUp" class="control-label"></label>
+                <select asp-for="StatusOfPickUp" class="form-control" asp-items="@Html.GetEnumSelectList<StatusOfPickUp>()"></select>
+                <span asp-validation-for="StatusOfPickUp" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="LoggedPickupTime" class="control-label"></label>
+                <input class="form-control" id="LoggedPickupTime" name="LoggedPickupTime" value="@DateTime.Now"/>
+                <span asp-validation-for="LoggedPickupTime" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-default" />
+            </div>
+        </form>
+
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,0 +1,183 @@
+﻿@model CornerStoneApril30.Models.Trip
+<script src="~/js/maintainscroll.js"></script>
+@{
+    ViewData["Title"] = "Roll Call";
+}
+
+<div>
+    <h2>Pickup Roll Call <i class="glyphicon glyphicon-bullhorn"></i></h2>
+    <hr />
+</div>
+<h3>Students in Trip</h3>
+<div>
+    @*<a asp-action="Edit" asp-route-id="@Model.ID">Edit</a> |*@
+    <a asp-action="@ViewBag.ReturnUrl">Back to List</a>
+</div>
+<div class="row">
+    <div class="col-md-10">
+        <table class="table table-bordered table-condensed table-responsive">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    @*<th>Age</th>*@
+                    <th>School</th>
+                    <th>Status of Pickup</th>
+                </tr>
+            </thead>
+            <tbody id="now">
+                @{
+                    @foreach (var item in Model.TripAssignments.OrderBy(s => s.Student.FirstMidName))
+                    {
+                        <tr class="bob">
+                            <td class="col-md-2">
+                                @item.Student.Fullname (@item.Student.AgeNow)
+                            </td>
+                            @*<td class="col-md-1">
+                                    @item.Student.AgeNow
+                                </td>*@
+                            <td class="col-md-2">
+                                @item.Student.School.Name
+                            </td>
+                            <td class="col-md-2">
+                                <form asp-action="RollCallEdit" asp-route-returnurl="@ViewBag.ReturnUrl">
+                                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                    <input type="hidden" asp-for="@item.ID" id="ID" name="ID" />
+                                    <input type="hidden" asp-for="@item.StudentID" id="StudentID" name="StudentID" />
+                                    <input type="hidden" asp-for="@item.TripID" id="TripID" name="TripID" />
+                                    <div class="form-horizontal colorch">
+                                        @*<label asp-for="@i.StatusOfPickUp" class="control-label"></label>*@
+                                        <select onchange="submit(this.form)" asp-for="@item.StatusOfPickUp" id="StatusOfPickUp" name="StatusOfPickUp" class="form-control bobby" asp-items="@Html.GetEnumSelectList<StatusOfPickUp>()"></select>
+                                        <span asp-validation-for="@item.StatusOfPickUp" data-valmsg-for="StatusOfPickUp" class="text-danger"></span>
+                                    </div>
+                                    <div class="">
+                                        @*<label asp-for="@i.LoggedPickupTime" class="control-label"></label>*@
+                                        <input type="hidden" asp-for="@item.LoggedPickupTime" class="form-control" id="LoggedPickupTime" name="LoggedPickupTime" value="@DateTime.Now" />
+                                        <span asp-validation-for="@item.LoggedPickupTime" data-valmsg-for="LoggedPickupTime" class="text-danger"></span>
+                                    </div>
+                                    @*<div class="form-group">
+                                            <input type="submit" value="Save" class="btn btn-default" />
+                                        </div>*@
+                                </form>
+                            </td>
+                        </tr>
+                        <tr class="trtest">
+                            <td colspan="2">
+                                <button class="glyphicon glyphicon-phone button" style="display:none"></button>
+                                <dl class="phones" style="display:none" id="bomb">
+                                    @{
+                                        foreach (var parent in item.Student.ParentAssignments)
+                                        {
+                                            <dt>@parent.Parent.RelationToChild</dt>
+                                            <dd style="font-style:italic">@parent.Parent.Fullname @parent.Parent.Phone</dd>
+                                        }
+                                    }
+                                </dl>
+                            </td>
+                            <td style="font-style:italic;font-size:smaller">
+                                @{
+                                    DateTime localDateTime = item.LoggedPickupTime;
+                                    DateTime utcDateTime = localDateTime.ToUniversalTime();
+                                    // ID from:
+                                    // "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows NT\CurrentVersion\Time Zone"
+                                    // See http://msdn.microsoft.com/en-us/library/system.timezoneinfo.id.aspx
+                                    string nzTimeZoneKey = "New Zealand Standard Time";
+                                    TimeZoneInfo nzTimeZone = TimeZoneInfo.FindSystemTimeZoneById(nzTimeZoneKey);
+                                    DateTime nzDateTime = TimeZoneInfo.ConvertTimeFromUtc(utcDateTime, nzTimeZone);
+                                    if (localDateTime.ToShortTimeString() == "12:00 AM")
+                                    {
+                                        @:-
+                                    }
+                                    else
+                                    {
+                                        @nzDateTime.ToShortTimeString()
+                                    }
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+        <hr />
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-10">
+        <form asp-action="RollCall">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="ID" />
+            <input type="hidden" asp-for="BusID" />
+            <input type="hidden" asp-for="DriverID" />
+            <input type="hidden" asp-for="PickupTime" />
+            <div class="form-group">
+                <div class="checkbox">
+                    <label>
+                        <input class="" asp-for="Complete" /> Complete
+                    </label>
+                    <i class="complete glyphicon glyphicon-question-sign"></i>
+                    <span style="display:none;font-weight:normal">Save is only needed for when checking or unchecking the trip as complete. <br />The status dropdowns save on change by them selves.</span>
+
+                </div>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-default" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    @*<a asp-action="Edit" asp-route-id="@Model.ID">Edit</a> |*@
+    <a asp-action="@ViewBag.ReturnUrl">Back to List</a>
+</div>
+<script>
+    function submit(form) {
+        form.submit();
+    }
+
+    $(document).ready(function () {
+        $('#now tr.trtest td').each(function () {
+            var t = $(this).find('dt').text();
+            if (t) {
+                $(this).find('button').toggle();
+            }
+        });
+        $('#now tr.trtest td button').each(function () {
+            $(this).on('click', function () {
+                $(this).nextAll().toggle();
+            })
+        });
+        $('.complete').on('click', function () {
+            $(this).next().toggle();
+        });
+
+        $('.colorch select option').each(function () {
+            var a = $(this).text();
+            //console.log(a);
+            $(this).css('background-color', '#fff');
+        });
+        $('.colorch select option:selected').each(function () {
+            var a = $(this).text();
+            console.log(a);
+            if (a == 'Scheduled') {
+                $(this).parent('select').css('background-color', '#ffc387');
+            } else if (a == 'PickedUp') {
+                $(this).parent('select').css('background-color', '#ccfccc');
+            } else if (a == 'Sick') {
+                $(this).parent('select').css('background-color', '#fffec6');
+            } else if (a == 'Sport') {
+                $(this).parent('select').css('background-color', '#87c9ff');
+            } else if (a == 'Caregiver') {
+                $(this).parent('select').css('background-color', '#dbfffc');
+            } else if (a == 'NoShow') {
+                $(this).parent('select').css('background-color', '#ffb2b2');
+            } else if (a == 'NoSchoolToday') {
+                $(this).parent('select').css('background-color', '#d6a675');
+            } else if (a == 'Cancelled') {
+                $(this).parent('select').css('background-color', '#3d2418');
+                $(this).parent('select').css('color', '#fff');
+                $('.colorch select option').css('color', '#000');
+            }
+        });
+    });
+</script>

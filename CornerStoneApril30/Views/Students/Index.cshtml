@@ -1,0 +1,111 @@
+﻿@model IEnumerable<CornerStoneApril30.Models.Student>
+
+@{
+    ViewData["Title"] = "Students";
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2">
+            <h2>Students</h2>
+
+            <p>
+                <a asp-action="Create">Create New</a>
+            </p>
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-offset-1 form-group">
+            <form class="form-inline" asp-controller="Students" asp-action="Index" method="get">
+                @*<label class="control-label">Student:</label>*@
+                @*<input class="form-control" type="text" name="SearchStudent">*@
+                <div class="form-group" style="width:200px">
+                    <select class="form-control selectpicker" data-live-search="true" title="Search Student" name="SearchStudent" asp-items="ViewBag.StudentSchool"></select>
+                </div>
+                <input class="btn btn-default" type="submit" value="Filter" />
+                <a asp-action="Index">Show all</a>
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            @using (Html.BeginForm("DeleteBatch", "Students", FormMethod.Post))
+            {
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Fullname)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Age)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.School)
+                            </th>
+
+                            <th>Excel Loaded Dates</th>
+                            <th></th>
+                            <th class="text-center">
+                                <input style="vertical-align:middle" type="checkbox" id="checkBoxAll" class="checkbox-inline" />
+                                <button type="submit" value="Delete" onclick="return confirm('Are you sure you want to delete this?')" class="btn btn-xs btn-danger glyphicon glyphicon-trash"></button>
+                            </th>
+
+                        </tr>
+                    </thead>
+                    <tbody id="now">
+                        @foreach (var item in Model.OrderBy(s => s.School.Name).ThenBy(s => s.Fullname))
+                        {
+                            <tr class="trtest">
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Fullname)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.AgeNow)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.School.Name)
+                                </td>
+
+                                <td>
+                                    <button type="button" class="button btn btn-sm btn-default">Show / Hide</button>
+                                    <dl style="display:none">
+                                        <dd><b>Mon </b>@item.Monday.ToShortDateString()</dd>
+                                        <dd><b>Tue </b>@item.Tuesday.ToShortDateString()</dd>
+                                        <dd><b>Wed </b>@item.Wednesday.ToShortDateString()</dd>
+                                        <dd><b>Thu </b>@item.Thursday.ToShortDateString()</dd>
+                                        <dd><b>Fri </b>@item.Friday.ToShortDateString()</dd>
+                                    </dl>
+                                </td>
+                                <td>
+                                    <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
+                                    <a asp-action="Delete" asp-route-id="@item.ID">Delete</a>
+                                </td>
+                                <td class="text-center">
+                                    <input type="checkbox" name="ID" value="@item.ID" class="chkCheckBoxId" />
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $('#now tr.trtest td .button').each(function () {
+            $(this).on('click', function () {
+                $(this).next().toggle();
+            })
+        });
+        $('#checkBoxAll').click(function () {
+            if ($(this).is(":checked")) {
+                $(".chkCheckBoxId").prop("checked", true)
+            }
+            else {
+                $(".chkCheckBoxId").prop("checked", false)
+            }
+        });
+    });
+</script>

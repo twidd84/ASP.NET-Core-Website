@@ -1,0 +1,29 @@
+﻿@model CornerStoneApril30.Models.ScheduleViewModels.TripIndexData
+
+@{
+    ViewData["Title"] = "About";
+}    ViewData["Title"] = "Trips - Monday";
+
+
+<h2>@ViewData["Title"]</h2>
+<h3>@ViewData["Message"]</h3>
+
+<p>Use this area to provide additional information.</p>
+@{
+    foreach (var t in Model.Trips)
+    {
+        var s = t.TripAssignments.Where(a => a.TripID == 1).ToList();
+        foreach (var g in s)
+        {
+            <p>@g.Student.Fullname</p>
+        }
+    }
+    <hr />
+    foreach (var r in Model.TripAssignments)
+    {
+        <p>@r.Trip.PickupTime</p>
+    }
+
+}
+
+

@@ -1,0 +1,45 @@
+﻿@model IEnumerable<CornerStoneApril30.Models.ParentAssignment>
+
+@{
+    ViewData["Title"] = "Assign a Parent with Student";
+}
+
+<h2>Parent Assignments</h2>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Parent)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Student)
+            </th>
+            <th>@Html.DisplayNameFor(model => model.Student.School.Name)</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Parent.Fullname)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Student.Fullname)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Student.School.Name)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.ID">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.ID">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

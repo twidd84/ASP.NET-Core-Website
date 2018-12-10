@@ -1,0 +1,122 @@
+﻿@model CornerStoneApril30.Models.ScheduleViewModels.TripIndexData
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h2>Trip Assignments</h2>
+
+<div class="row">
+    <div class="col-md-4">
+        <select class="form-control" id="myInput" onchange="myFunction()">
+            <option disabled selected>--- Select Trip Time ---</option>
+            <option value="" style="font-weight:bold;font-style:italic">All</option>
+            @{
+                foreach (var s in Model.TripAssignments)
+                {
+                    if (User.Identity.Name.Equals(s.Trip.Driver.User.Fullname) || User.IsInRole("Admin"))
+                    {
+                        <option value="@s.TripID">@s.Trip.Driver.User.FirstMidName | @s.Trip.WeekdayDay</option>
+                    }
+                }
+            }
+        </select>
+    </div>
+</div>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Status
+            </th>
+            <th>
+                Logged Time
+            </th>
+            <th>
+                Student Name
+            </th>
+            <th>
+                School Name
+            </th>
+            <th></th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody id="myTable">
+        @foreach (var item in Model.TripAssignments)
+        {
+            if (User.Identity.Name.Equals(item.Trip.Driver.User.UserName) || User.IsInRole("Admin"))
+            {
+                <tr>
+                    <td>
+                        @item.StatusOfPickUp
+                        <form asp-action="Edit" class="col-md-6">
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            <input type="hidden" data-val="true" data-val-required="The ID field is required." id="ID" name="ID" value="@item.ID" />
+                            <input type="hidden" data-val="true" data-val-required="The StudentID field is required." id="StudentID" name="StudentID" value="@item.StudentID" />
+                            <input type="hidden" data-val="true" data-val-required="The TripID field is required." id="TripID" name="TripID" value="@item.TripID" />
+                            <div class="form-group">
+                                <select for="StatusOfPickUp" data-val="true" data-val-required="The StatusOfPickUp field is required." id="StatusOfPickUp" name="StatusOfPickUp" class="form-control" asp-items="@Html.GetEnumSelectList<StatusOfPickUp>()">
+                                </select>
+                                <span class="text-danger field-validation-valid" data-valmsg-for="StatusOfPickUp" data-valmsg-replace="true"></span>
+                            </div>
+                            <div class="form-group">
+                                <input type="hidden" class="form-control" id="LoggedPickupTime" name="LoggedPickupTime" value="@DateTime.Now" />
+                            </div>
+                            <div class="form-group">
+                                <input type="submit" value="Save" class="btn btn-default" />
+                            </div>
+                        </form>
+                    </td>
+                    <td>
+                        @item.LogTime
+                    </td>
+                    <td>
+                        @item.Student.Fullname
+                    </td>
+                    <td>
+                        @item.Student.School.Name
+                    </td>
+                    <td class="">
+                        @item.Trip.Driver.User.FirstMidName
+                    </td>
+                    <td class="">
+                        @item.TripID
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
+                        <a asp-action="Details" asp-route-id="@item.ID">Details</a>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            @: |
+                            <a asp-action="Delete" asp-route-id="@item.ID">Delete</a>
+                        }
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+<script>
+    function myFunction() {
+        // Declare variables
+        var select, filter, table, tr, td, i;
+        select = document.getElementById("myInput");
+        filter = select.value;
+        table = document.getElementById("myTable");
+        tr = table.getElementsByTagName("tr");
+
+        // Loop through all table rows, and hide those who don't match the search query
+        for (i = 0; i < tr.length; i++) {
+            td = tr[i].getElementsByTagName("td")[5];
+            if (td) {
+                if (td.innerHTML.indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                }
+                else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+    }
+</script>

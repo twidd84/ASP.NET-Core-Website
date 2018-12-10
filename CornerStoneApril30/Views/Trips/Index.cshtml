@@ -1,0 +1,284 @@
+﻿@model CornerStoneApril30.Models.ScheduleViewModels.TripIndexData
+@{
+    ViewData["Title"] = "Trips";
+}
+<style>
+    /* Popup container */
+    .popup {
+        position: relative;
+        display: inline-block;
+        cursor: pointer;
+        word-wrap: break-word;
+    }
+
+        /* The actual popup (appears on top) */
+        .popup .popuptext {
+            visibility: hidden;
+            width: 160px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px 0;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -80px;
+            padding: 10px;
+        }
+
+            /* Popup arrow */
+            .popup .popuptext::after {
+                content: "";
+                position: absolute;
+                top: 100%;
+                left: 50%;
+                margin-left: -5px;
+                border-width: 5px;
+                border-style: solid;
+                border-color: #555 transparent transparent transparent;
+            }
+
+        /* Toggle this class when clicking on the popup container (hide and show the popup) */
+        .popup .show {
+            visibility: visible;
+            -webkit-animation: fadeIn 1s;
+            animation: fadeIn 1s
+        }
+
+    /* Add animation (fade in the popup) */
+    @@-webkit-keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+</style>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="col-md-4">
+                <h2>
+                    Trips
+                </h2>
+                <p class="font-italic">
+                    <a asp-action="Create">Create New</a>
+                </p>
+                @{
+                    if (User.Identity.IsAuthenticated)
+                    {
+                        foreach (var fdf in ViewBag.Drivers)
+                        {
+                            @if (User.Identity.Name.Equals(fdf.User.UserName))
+                            {
+                                <blockquote>@fdf.User.Fullname</blockquote>
+                            }
+                        }
+                    }
+                }
+            </div>
+            <div class="col-md-4">
+                <div class="col-md-2 col-md-push-1 text-center" style="margin-top:20px;margin-bottom:0px">
+                    <table class="table table-condensed table-bordered">
+                        <tbody>
+                            <tr class="dayCounts">
+                                <td>@ViewBag.MonCount</td>
+                                <td>@ViewBag.TueCount</td>
+                                <td>@ViewBag.WedCount</td>
+                                <td>@ViewBag.ThuCount</td>
+                                <td>@ViewBag.FriCount</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr class="days">
+                                <th>Mon</th>
+                                <th>Tue</th>
+                                <th>Wed</th>
+                                <th>Thu</th>
+                                <th>Fri</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-4 col-md-push-3">
+                <h2>
+                    <img style="max-height:50px" src="~/images/673392_school_512x512.png" />
+                </h2>
+            </div>
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-8 col-md-push-1 form-group">
+            <form class="form-inline" asp-controller="Trips" asp-action="Index" method="get">
+                <div class="form-group">
+                    <select class="form-control selectpicker" data-live-search="true" title="Search Student" name="SearchStudent" asp-items="ViewBag.StudentSchool"></select>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-sm">and/or Date:</label>
+                    <input type="date" name="TripDate" value="@ViewData["tripDate"]" class="form-control" />
+                </div>
+                <button class="btn btn-default" type="submit">Filter</button>
+                <a asp-action="Index">Show all</a>
+                <p>@ViewBag.SearchResult @ViewBag.DateResult</p>
+            </form>
+        </div>
+        <div class="col-md-4 form-group">
+            <form class="form-inline" asp-controller="Trips" asp-action="Report" method="get">
+                <div class="form-group">
+                    <label>Create Report:</label>
+                    <input type="date" name="DateSearch" value="@ViewData["dateReport"]" class="form-control" required />
+                </div>
+                <button type="submit" formtarget="_blank" class="btn btn-default">Create</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            @using (Html.BeginForm("DeleteBatch", "Trips", FormMethod.Post))
+            {
+                <table class="table table-bordered table-responsive">
+                    <thead>
+                        <tr>
+                            <th>Driver</th>
+                            <th>Schools</th>
+                            <th class="text-center"><i class="glyphicon glyphicon-time"></i></th>
+                            <th class="text-center"><i class="glyphicon glyphicon-check"></i></th>
+
+                            <th class="text-center"><i class="glyphicon glyphicon-edit" style="color:mediumblue"></i></th>
+                            <th class="text-center">
+                                <input style="vertical-align:middle" type="checkbox" id="checkBoxAll" class="checkbox-inline" />
+                                <button type="submit" value="Delete" onclick="return confirm('Are you sure you want to delete this?')" class="btn btn-xs btn-danger glyphicon glyphicon-trash"></button>
+                            </th>
+
+                        </tr>
+                    </thead>
+                    <tbody id="now">
+                        @foreach (var item in Model.Trips.OrderBy(d => d.PickupTime).ThenBy(d => d.BusID))
+                        {
+                            string selectedRow = "";
+                            if (item.ID == (int?)ViewData["TripID"])
+                            {
+                                selectedRow = "success";
+                            }
+                            <tr class="trtest">
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Driver.User.Fullname)<br />
+                                    <b>@Html.DisplayFor(modelItem => item.Bus.ID)</b>
+                                </td>
+                                <td>
+                                    @{
+                                        //Below is to list the students names in each school into the index view.
+                                        List<School> schools = new List<School>();
+                                        List<Student> students = new List<Student>();
+                                        foreach (var sc in item.TripAssignments)
+                                        {
+                                            schools.Add(sc.Student.School);
+                                            students.Add(sc.Student);
+                                        }
+                                        var distinctSchools = schools.Distinct(new SchoolComparer());
+                                        @foreach (var schoolsDis in distinctSchools)
+                                        {
+                                            <button type="button" class="button1 btn btn-xs btn-info" style="margin-bottom:3px">@schoolsDis.Name (@students.Where(a => a.School.Name == schoolsDis.Name).Count())</button>
+                                            <dl style="display:none">
+                                                @foreach (var s in students.Where(g => g.School.Name == schoolsDis.Name))
+                                                {
+                                                    <dd>@s.Fullname (@s.AgeNow)</dd>
+                                                }
+                                            </dl>
+                                        }
+                                    }
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.WeekdayDay) <br />
+                                    <a class="btn btn-xs btn-primary" asp-action="RoleCall" asp-route-id="@item.ID">Roll Call</a>
+
+                                </td>
+                                <td class="text-center">
+                                    @Html.DisplayFor(modelItem => item.Complete)
+                                </td>
+
+                                <td class="text-center">
+                                    @*Disabled for now because it is unnessary and for multiple Trips it shouldn't load at the bottom of the page.*@
+                                    @*<a asp-action="Index" asp-route-id="@item.ID">Select</a> |*@
+                                    <a asp-action="Edit" asp-route-id="@item.ID">Edit</a>
+                                    @*Turned off delete link because the deleteBatch method will be used to delete trips*@
+                                    @*@: |
+                                        <a asp-action="Delete" asp-route-id="@item.ID">Delete</a>*@
+                                </td>
+
+                                <td class="text-center">
+                                    <input type="checkbox" name="ID" value="@item.ID" class="chkCheckBoxId" />
+                                </td>
+
+
+                            </tr>
+
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+
+    <div class="popup pull-right">
+        <button type="button" onclick="myFunction()" class="btn btn-sm btn-default">
+            <i class="glyphicon glyphicon-info-sign"></i> more info
+        </button>
+        <span class="popuptext" id="myPopupTrips">When using 'checkall' for deleting trips first filter the trips by a date you want to delete them.</span>
+    </div>
+
+
+</div>
+<script>
+    $(document).ready(function () {
+        $('#now tr.trtest td .button1').each(function () {
+            $(this).on('click', function () {
+                $(this).next().toggle();
+            })
+        });
+        $('#checkBoxAll').click(function () {
+            if ($(this).is(":checked")) {
+                $(".chkCheckBoxId").prop("checked", true)
+            }
+            else {
+                $(".chkCheckBoxId").prop("checked", false)
+            }
+        });
+        $('.dayCounts td').each(function () {
+            if ($(this).text() == "Past") {
+                $(this).css('background-color', '');
+            }
+            else if ($(this).text() == "0") {
+                $(this).text("0left");
+                $(this).css('background-color', '#99f291');
+            }
+            else {
+                $(this).css('background-color', '#99f291');
+            }
+        });
+    });
+    // When the user clicks on div, open the popup
+    function myFunction() {
+        var popup = document.getElementById("myPopupTrips");
+        popup.classList.toggle("show");
+    }
+</script>
+
+

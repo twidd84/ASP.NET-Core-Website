@@ -1,0 +1,161 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+<style>
+    body, html {
+        height: 100%;
+    }
+
+    .bg { /* The image used */
+        background-image: url("/images/City-of-Invercargill-2.jpg"); /* Full height */
+        height: 80%; /* Center and scale the image nicely */
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+    /*Code for Pop ups on info buttons in website*/
+    .popup {
+        position: relative;
+        display: inline-block;
+        cursor: pointer;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+
+        /* The actual popup */
+        .popup .popuptext {
+            visibility: hidden;
+            width: 180px;
+            height: auto;
+            word-wrap: break-word;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px 0;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -80px;
+            padding: 10px;
+        }
+
+            /* Popup arrow */
+            .popup .popuptext::after {
+                content: "";
+                position: absolute;
+                top: 100%;
+                left: 50%;
+                margin-left: -5px;
+                border-width: 5px;
+                border-style: solid;
+                border-color: #555 transparent transparent transparent;
+            }
+
+        /* Toggle this class - hide and show the popup */
+        .popup .show {
+            visibility: visible;
+            -webkit-animation: fadeIn 1s;
+            animation: fadeIn 1s;
+        }
+
+    @@-webkit-keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+</style>
+@section Back{ class="bg"}
+<div class="container" style="min-height:600px">
+    <div class="col-md-9 bg-info" style="color:white;background:rgba(0,0,0,0.40);border-radius:5px;margin-top:20px;padding-bottom:15px">
+        <h2>Create Trips for Cornerstone Bus system (Public version)</h2>
+        <a href="/Trips" class="btn btn-success">Over 20 schools </a>
+        <h5>
+            Create Trips on the All Trips page of the website. Search via a date in the the current week, <br />
+            and the number of students loaded for that date will appear in the search.
+        </h5>
+    </div>
+
+
+    @if (User.IsInRole("Admin"))
+    {
+        <div class="row">
+            <div class="col-md-12">
+                <a class="btn btn-info" asp-area="" asp-controller="Account" asp-action="Register">Register User to be a Driver</a>
+            </div>
+        </div>
+    }
+    <div class="row">
+        <div class="col-md-12" style="margin-top:20px">
+            <div class="col-md-4" style="background:rgba(255,255,255,1);padding:10px 40px 40px 20px;border-radius:5px;border-style:solid;border-color:gray;margin-bottom:30px">
+                <div class="col-md-10">
+                    <h2>
+                        Upload Excel File
+                    </h2>
+                    <h6>(Visible but for Admin only)</h6>
+                </div>
+                <div class="popup col-md-2 text-center" style="margin-top:25px">
+                    <i class="glyphicon glyphicon-question-sign" onclick="myFunction()"></i>
+                    <span class="popuptext" id="myPopup">If the school name on the Excel sheet is not already in the website, please add it's name*(aprostrophies if necessary) into the Schools section first before uploading.</span>
+                </div>
+                <div class="col-md-12">
+                    <form method="post" enctype="multipart/form-data" asp-controller="UploadFiles" asp-action="Index">
+                        <div class="form-group">
+                            <p>Please select scheduling date for this excel file:</p>
+                            <input type="date" name="PickupTime" value="@ViewData["dateFilter"]" class="form-control" required />
+                            <span class="text-danger field-validation-valid" data-valmsg-for="PickupTime" data-valmsg-replace="true"></span>
+                        </div>
+                        @*<div class="form-group">
+                                <p>Please enter the last row number containing data e.g. 122:</p>
+                                <input type="number" placeholder="Enter last row number" name="NumRows" value="@ViewData["numRows"]" class="form-control" />
+                            </div>*@
+                        <div class="form-group">
+                            <p>Upload one excel file at a time below:</p>
+                            <input class="btn btn-default" type="file" name="files" placeholder="" required />
+                            <span class="text-danger field-validation-valid" data-valmsg-for="files" data-valmsg-replace="true"></span>
+                        </div>
+                        <div class="form-group">
+                            <input class="btn btn-default" type="submit" value="Upload" onclick="myLoading()" />
+                        </div>
+                    </form>
+                    <h4 style="display:none" id="loading">Loading...</h4>
+                    <h4 id="h4">
+                        @ViewBag.UploadComplete
+                    </h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script>
+    function myFunction() {
+        var popup = document.getElementById("myPopup");
+        popup.classList.toggle("show");
+    }
+    function myLoading() {
+        $("#loading").show();
+        if ($('#h4.field - item: contains("Uploading")').length > 0) {
+            $("#loading").hide();
+        }
+    }
+</script>
+
+

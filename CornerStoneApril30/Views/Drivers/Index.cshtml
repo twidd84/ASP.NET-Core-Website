@@ -1,0 +1,57 @@
+﻿@model IEnumerable<CornerStoneApril30.Models.Driver>
+
+@{
+    ViewData["Title"] = "Drivers";
+}
+
+
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="col-md-12">
+            <h2>Drivers</h2>
+        </div>
+        <div class="col-md-8">
+            <label style="padding-right:10px">To create a new driver, first you need to register a new <em style="font-style:italic">User.</em> Then click <em style="font-style:italic">Create New</em> </label>
+            <a class="btn btn-info" asp-area="" asp-controller="Account" asp-action="Register" asp-route-returnurl="@ViewData["ReturnUrl"]">Register a new user?</a>
+        </div>
+        <div class="col-md-2">
+            <a class="btn btn-primary" asp-action="Create">Create New</a>
+        </div>
+
+        <div class="col-md-12">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>
+                            @Html.DisplayNameFor(model => model.DriverLicence)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.User)
+                        </th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.DriverLicence)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.User.Fullname)
+                            </td>
+                            <td>
+                                <a asp-action="Edit" asp-route-id="@item.UserID">Edit</a> |
+                                <a asp-action="Details" asp-route-id="@item.UserID">Details</a> |
+                                <a asp-action="Delete" asp-route-id="@item.UserID">Delete</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>

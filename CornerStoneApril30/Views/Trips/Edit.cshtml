@@ -1,0 +1,201 @@
+﻿@model CornerStoneApril30.Models.Trip
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h2>Edit</h2>
+
+<h4>Trip</h4>
+<hr />
+<div class="row">
+    <div class="col-md-12">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="ID" />
+            <div class="form-group col-md-4">
+                @* Note id on input disables editing time of trip for now *@
+                <label asp-for="PickupTime" class="control-label"></label>
+                <input id="datepicker" asp-for="PickupTime" class="form-control" />
+                <span asp-validation-for="PickupTime" class="text-danger"></span>
+            </div>
+            <div class="form-group col-md-4">
+                <label asp-for="Bus" class="control-label"></label>
+                <select id="busNum" asp-for="BusID" class="form-control" asp-items="ViewBag.BusID"></select>
+                <span asp-validation-for="BusID" class="text-danger"></span>
+            </div>
+            <div class="form-group col-md-4">
+                <label asp-for="DriverID" class="control-label"></label>
+                <select class="form-control" asp-for="DriverID">
+                    @foreach (var Driver in ViewBag.DriverID)
+                    {
+                        @if (Driver.UserID == Model.DriverID)
+                        {
+                            <option selected="selected" value="@Driver.UserID">@Driver.User.Fullname</option>
+                        }
+                        else
+                        {
+                            <option value="@Driver.UserID">@Driver.User.Fullname</option>
+                        }
+
+                    }
+                </select>
+                <span asp-validation-for="DriverID" class="text-danger"></span>
+                @*<select asp-for="DriverID" class="form-control" asp-items="ViewBag.DriverID"></select>*@
+            </div>
+            <div class="form-group col-md-4">
+                <label class="control-label">Search by School</label><br />
+                <select class="form-control" id="myInput" onchange="myFunction()">
+                    <option disabled selected>--- Select school ---</option>
+                    <option value="" style="font-weight:bold;font-style:italic">All</option>
+                    @{
+                        List<CornerStoneApril30.Models.ScheduleViewModels.AssignedTripData> sh = ViewBag.Students;
+                        var count = 0;
+                        foreach (var schools in ViewBag.Schools)
+                        {
+                            foreach (var shr in sh)
+                            {
+                                if (shr.Student.School.Name == schools.Name)
+                                {
+                                    count++;
+                                }
+                            }
+                            <option class="sarah" value="@schools.Name">@schools.Name (@count)</option>
+                            count = 0;
+                        }
+                    }
+
+                </select>
+            </div>
+            <div class="form-group col-md-4">
+                <label class="control-label">Search by Student</label><br />
+                <input class="form-control" type="text" size="40" id="myInputS" onkeyup="myFunctionStudent()" placeholder="Search for student name..">
+            </div>
+            <div class="form-inline col-md-4" style="padding-top:25px">
+                <input style="min-width:200px;border-style:outset;border-color:orangered" type="submit" value="Save" class="btn btn-primary" />
+                <a asp-action="@ViewBag.ReturnUrl"> | Back to List</a>
+            </div>
+            <div class="row">
+                <div class="col-md-8">
+                    <table class="table table-bordered" id="myTable">
+                        <thead>
+                            <tr>
+                                <th>Student Name</th>
+                                <th>SchoolName</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                List<CornerStoneApril30.Models.ScheduleViewModels.AssignedTripData> students = ViewBag.Students;
+                                foreach (var item in students.OrderByDescending(z => z.Assigned).ThenBy(s => s.Student.School.Name))
+                                {
+                                    <tr>
+                                        <td>
+                                            <label class="containC" style="font-weight:normal">
+                                                 @item.Student.Fullname
+                                                <input type="checkbox" class="checkbox" name="selectedStudents" value="@item.StudentID" checked="@item.Assigned" />
+                                                <span class="checkmark"></span>
+                                            </label>
+                                        </td>
+                                        <td>
+                                            @item.Student.School.Name
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
+<div>
+    <a asp-action="@ViewBag.ReturnUrl">Back to List</a>
+</div>
+<p id="rowCounts"></p>
+
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#myTable').bind('change', function () {
+                var num = $("input[type='checkbox']:checked").length;
+                //var seats = busseats % 100;
+                var seats = $('#busNum :selected').closest('optgroup').attr('label');
+                if (num == 0) {
+                    document.getElementById('counter').innerHTML = num;
+                    $('#rcorners4').css("background-color", "#99f291");
+                }
+                else if (num == seats) {
+                    $("input[type='checkbox']:not(:checked)").attr('disabled', true);
+                    document.getElementById('counter').innerHTML = num + " FULL";
+                    $('#rcorners4').css("background-color", "#d81c1c");
+                }
+                else if (num > seats) {
+                    $("input[type='checkbox']:not(:checked)").attr('disabled', true);
+                    document.getElementById('counter').innerHTML = num + " Over";
+                    $('#rcorners4').css("background-color", "#af0f9a");
+                }
+                else {
+                    $("input[type='checkbox']").attr('disabled', false);
+                    document.getElementById('counter').innerHTML = num;
+                    $('#rcorners4').css("background-color", "#99f291");
+                }
+            });
+            $('#myTable').trigger('change');
+            $('#busNum').on('change', function () {
+                $("input[type='checkbox']").attr('disabled', false);
+            });
+
+            $("#datepicker").attr("readonly", "true");
+            //var rowCount = $('#myTable >tbody >tr').length;
+            //$('#rowCounts').text(rowCount);
+        });
+        function myFunction() {
+            // Declare variables
+            var select, filter, table, tr, td, i;
+            select = document.getElementById("myInput");
+
+            filter = select.value.toUpperCase();
+            table = document.getElementById("myTable");
+            tr = table.getElementsByTagName("tr");
+
+            // Loop through all table rows, and hide those who don't match the search query
+            for (i = 0; i < tr.length; i++) {
+                td = tr[i].getElementsByTagName("td")[1];
+                if (td) {
+                    if (td.innerHTML.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+        }
+        function myFunctionStudent() {
+            // Declare variables
+            var input, filter, table, tr, td, i;
+            input = document.getElementById("myInputS");
+            filter = input.value.toUpperCase();
+            table = document.getElementById("myTable");
+            tr = table.getElementsByTagName("tr");
+
+            // Loop through all table rows, and hide those who don't match the search query
+            for (i = 0; i < tr.length; i++) {
+                td = tr[i].getElementsByTagName("td")[0];
+                if (td) {
+                    if (td.innerHTML.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+        }
+    </script>
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

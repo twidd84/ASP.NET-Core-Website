@@ -1,0 +1,364 @@
+﻿@model CornerStoneApril30.Models.Trip
+
+@{
+    ViewData["Title"] = "Create";
+}
+<style>
+    #rcorners3 {
+        border-radius: 8px 25px;
+        background: #87c9ff;
+        width: 85px;
+        height: 59px;
+        margin-bottom: 40px;
+        line-height: 59px;
+        color: white;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    #rcorners4 {
+        border-radius: 8px 25px;
+        background: #99f291;
+        width: 170px;
+        height: 59px;
+        line-height: 59px;
+        text-align: center;
+        vertical-align: middle;
+        margin-bottom: 40px;
+    }
+
+    #countS {
+        height: 59px;
+        line-height: 59px;
+        font-weight: 600;
+        font-size: xx-large;
+    }
+
+    .countT {
+        height: 59px;
+        line-height: 59px;
+        font-weight: 600;
+        font-size: xx-large;
+        color: white;
+        text-align: center;
+    }
+
+    .sidebarBox {
+        width: 370px; /* Replace with your sidebar width */
+        float: right;
+        position: relative;
+    }
+
+    .scrollingBox {
+        width: 450px; /* Replace with the same width as sidebar */
+    }
+</style>
+<h2>Create</h2>
+<h4>Trip</h4>
+<hr />
+<p>@ViewBag.ReturnUrl</p>
+<div class="row">
+    <div class="col-md-12">
+        <form asp-action="Create" method="get">
+            <div class="form-inline form-group col-md-4">
+                @* Commented code below as discovered this does nothing to affect the search *@
+                @* value="@ViewData["dateFilter"]" *@
+                <label>Choose Date &amp; Time of Trip:</label><br />
+                <input type="date" name="PickupTime" value="@ViewData["dateFilter"]" class="form-control" />
+                <span asp-validation-for="PickupTime" class="text-danger"></span>
+                <input type="submit" value="Search" class="btn btn-default" />
+            </div>
+        </form>
+        <div class="form-group col-md-4" id="rcorners3">
+            <p id="countS"></p>
+            @*<p>@studentCount</p>*@
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group col-md-4 k-datepicker">
+                <label class="control-label">(Read-only)</label>
+                @Html.TextBoxFor(m => m.PickupTime, "{0:yyyy-MM-dd}", new { type = "date", @class = "form-control", @id = "datepicker" })
+                @*<label asp-for="PickupTime" class="control-label"></label>
+                    <input asp-for="PickupTime" class="form-control" />
+                    <span asp-validation-for="PickupTime" class="text-danger"></span>*@
+            </div>
+            <div class="form-group col-md-4">
+                <label asp-for="BusID" class="control-label"></label>
+                <select id="busNum" asp-for="BusID" class="form-control" asp-items="ViewBag.BusID">
+                    <option value="" disabled selected>--- Select Bus ---</option>
+                </select>
+                <span asp-validation-for="BusID" class="text-danger"></span>
+            </div>
+            <div class="form-group col-md-4">
+                <label asp-for="DriverID" class="control-label"></label>
+                <select class="form-control" asp-for="DriverID">
+                    <option value="" disabled selected>--- Select Driver ---</option>
+                    @foreach (var Driver in ViewBag.DriverID)
+                    {
+                        <option value="@Driver.UserID">@Driver.User.Fullname</option>
+                    }
+                </select>
+                <span asp-validation-for="DriverID" class="text-danger"></span>
+                @*<select asp-for="DriverID" class="form-control" asp-items="ViewBag.DriverID"></select>*@
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group col-md-4">
+                        <label class="control-label">Search by School</label><br />
+                        <select class="form-control" id="myInput" onchange="myFunction()" asp-items="ViewBag.SelectSchool">
+                            <option value="" disabled selected>--- Select School ---</option>
+                            <option value="" style="font-weight:bold;font-style:italic">All</option>
+                            @{ @*One schoollist with count solution below. This same code idea is in the Viewbag SelectSchool Instead*@
+                            List<CornerStoneApril30.Models.ScheduleViewModels.AssignedTripData> sh = ViewBag.Students;
+                            var count = 0;
+                            foreach (var schools in ViewBag.Schools)
+                            {
+                                foreach (var shr in sh.OrderBy(v => v.Student.School.Name).Where(d => d.Student.School.Name == schools.Name))
+                                {
+                                    count++;
+                                }
+                                <option class="sarah" value="@schools.Name">@schools.Name (@count)</option>
+                                count = 0;
+                            }
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label class="control-label">Search by Student</label><br />
+                        <input class="form-control" type="text" size="40" id="myInputS" onkeyup="myFunctionStudent()" placeholder="Search for student name..">
+                    </div>
+                    <div class="form-group col-md-4" style="margin-top:25px">
+                        <input id="createtrip" style="min-width:200px;border-style:outset;border-color:orangered" type="submit" value="Create" class="btn btn-primary" />
+                        <a asp-action="@ViewBag.ReturnUrl"> | Cancel</a><br />
+                        <span class="text-danger" style="display:none">At least one student must be selected.</span>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="col-md-8">
+                        <table class="table table-bordered" id="myTable">
+                            @* data-toggle="checkboxes" data-range="true" *@
+                            <thead>
+                                <tr>
+                                    <th class="trtest">Student Name <i class="glyphicon glyphicon-question-sign button"></i><p style="display:none;font-weight:normal">To select multiple students, hold down shift and click a name up until where you want students selected.</p></th>
+                                    <th>SchoolName</th>
+                                </tr>
+                            </thead>
+                            <tbody id="myHidden">
+                                @{
+                                    List<CornerStoneApril30.Models.ScheduleViewModels.AssignedTripData> students = ViewBag.Students;
+                                    foreach (var item in students.OrderBy(s => s.Student.School.Name))
+                                    {
+                                        <tr>
+                                            <td>
+                                                <label class="containC" style="font-weight:normal">
+                                                    @item.Student.Fullname
+                                                    <input disabled type="checkbox" class="checkbox" name="selectedStudents" value="@item.StudentID" checked="@item.Assigned" />
+                                                    <span class="checkmark"></span>
+                                                </label>
+                                            </td>
+                                            <td>
+                                                @item.Student.School.Name
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="sidebarBox">
+                        <div class="scrollingBox" id="rcorners4">
+                            <p id="counter" class="countT"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div>
+    <a asp-action="@ViewBag.ReturnUrl">Back to List</a>
+</div>
+
+
+
+@section Scripts {
+    @*<script src="~/js/jquery.checkboxes-1.2.2.min.js"></script>*@
+    <script>
+        var rowCount;
+        $('#myTable').bind('change', function () {
+            var num = $("input[type='checkbox']:checked").length;
+            //var seats = busseats % 100;
+            var seats = $('#busNum :selected').closest('optgroup').attr('label');
+            if (num == 0) {
+                document.getElementById('counter').innerHTML = num;
+                $('#rcorners4').css("background-color", "#99f291");
+            }
+            else if (num == seats) {
+                $('#createtrip').submit().removeAttr('disabled');
+                $('#createtrip').nextAll("span").hide();
+                $("input[type='checkbox']:not(:checked)").attr('disabled', true);
+                document.getElementById('counter').innerHTML = num + " FULL";
+                $('#rcorners4').css("background-color", "#d81c1c");
+            }
+            else if (num > seats) {
+                $('#createtrip').submit().removeAttr('disabled');
+                $('#createtrip').nextAll("span").hide();
+                $("input[type='checkbox']:not(:checked)").attr('disabled', true);
+                document.getElementById('counter').innerHTML = num + " Over";
+                $('#rcorners4').css("background-color", "#af0f9a");
+            }
+            else {
+                $('#createtrip').submit().removeAttr('disabled');
+                $('#createtrip').nextAll("span").hide();
+                $("input[type='checkbox']").attr('disabled', false);
+                document.getElementById('counter').innerHTML = num;
+                $('#rcorners4').css("background-color", "#99f291");
+            }
+        });
+        $('#myTable').trigger('change');
+        $('#busNum').on('change', function () {
+            $("input[type='checkbox']").attr('disabled', false);
+            $("input[type='checkbox']").attr('checked', false);
+        });
+        $(document).ready(function () {
+            $("#datepicker").attr("readonly", "true");
+            rowCount = $('#myTable >tbody >tr').length;
+            document.getElementById('countS').innerHTML = rowCount;
+            var $chkboxes = $('.checkbox');
+            var lastChecked = null;
+            var rows = $chkboxes.closest('label');
+            $chkboxes.click(function (e) {
+                if (!lastChecked) {
+                    lastChecked = this;
+                    return;
+                }
+
+                if (e.shiftKey) {
+                    var start = $chkboxes.index(this);
+                    var end = $chkboxes.index(lastChecked);
+
+                    $chkboxes.slice(Math.min(start, end), Math.max(start, end) + 1).prop('checked', lastChecked.checked);
+                }
+
+                lastChecked = this;
+            });
+
+            $('.trtest .button').on('click', function () {
+                $(this).next().toggle();
+            });
+            $('#createtrip').on('click', function () {
+                var num = $("input[type='checkbox']:checked").length;
+                if (num < 1) {
+                    $(this).submit().attr('disabled', true);
+                    $(this).nextAll("span").toggle();
+                }
+            });
+        });
+
+
+        function myFunction() {
+            // Declare variables
+            $('#myTable thead tr th input:checkbox').attr('checked', false);
+            var select, selectTime, filter, table, tr, td, i, inputTime, tdDay;
+            select = document.getElementById("myInput");
+            //selectTime = document.getElementById("myTime");
+            //var d = new Date(selectTime.value);
+            //var day = d.getUTCDate();
+            //document.getElementById("hello").innerHTML = day;
+            filter = select.value.toUpperCase();
+            table = document.getElementById("myTable");
+            tr = table.getElementsByTagName("tr");
+
+            // Loop through all table rows, and hide those who don't match the search query
+            for (i = 0; i < tr.length; i++) {
+                td = tr[i].getElementsByTagName("td")[1];
+                //tdDay = tr[i].getElementsByTagName("td")[3];
+                if (td /*&& tdDay*/) {
+                    if (td.innerHTML.toUpperCase().indexOf(filter) > -1 /*&& day != tdDay.innerHTML*/) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+        }
+        function myFunctionStudent() {
+            // Declare variables
+            var input, filter, table, tr, td, i;
+            input = document.getElementById("myInputS");
+            filter = input.value.toUpperCase();
+            table = document.getElementById("myTable");
+            tr = table.getElementsByTagName("tr");
+
+            // Loop through all table rows, and hide those who don't match the search query
+            for (i = 0; i < tr.length; i++) {
+                td = tr[i].getElementsByTagName("td")[0];
+                if (td) {
+                    if (td.innerHTML.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+        }
+        //$('#myTable thead tr th input:checkbox').click(function () {
+        //    if ($(this).is(':checked')) {
+        //        $('.checkbox:visible').prop('checked', true)
+        //    } else {
+        //        $('.checkbox').prop('checked', false)
+        //    }
+        //});
+        //$('#myTable tbody tr td input.checkbox').on('change', function (e) {
+        //    var row = $(this).closest('label');
+        //    if ($(this).is(':not(:checked)')) {
+        //        row = $(this).closest('tr').css("background-color", "");
+        //        var filter = $(this).closest('label').text();
+        //        var table = document.getElementById("two");
+        //        var tr = table.getElementsByTagName("tr");
+        //        for (i = 0; i < tr.length; i++) {
+        //            td = tr[i].getElementsByTagName("td")[0];
+        //            if (td) {
+        //                if (td.innerHTML.toUpperCase() == filter.toUpperCase()) {
+        //                    tr[i].remove();
+        //                }
+        //            }
+        //        }
+        //    }
+        //    else {
+        //        row = $(this).closest('tr').css("background-color", "#ccfccc");
+        //        row = $(this).closest('label').text();
+        //        var school = $(this).closest('tr').find('td:eq(1)').text();
+        //        $('#two tbody').append('<tr>' + '<td>' + row + '</td>' + '<td>' + school + '</td>' + '</tr>').css("background-color", "#ccfccc");
+        //    }
+        //});
+    </script>
+    <script type="text/javascript">
+        $(function () {
+            // Set this variable with the height of your sidebar + header
+            var offsetPixels = 300;
+
+            $(window).scroll(function () {
+                if ($(window).scrollTop() > offsetPixels) {
+                    $(".scrollingBox").css({
+                        "position": "fixed",
+                        "top": "15px",
+                        "margin-top": "50px"
+                    });
+                } else {
+                    $(".scrollingBox").css({
+                        "position": "static",
+                        "margin-top": "0px"
+                    });
+                }
+            });
+        });
+    </script>
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

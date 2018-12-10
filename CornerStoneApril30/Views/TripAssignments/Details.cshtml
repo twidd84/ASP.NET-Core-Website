@@ -1,0 +1,42 @@
+﻿@model CornerStoneApril30.Models.TripAssignment
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>TripAssignment</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.StatusOfPickUp)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.StatusOfPickUp)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.LoggedPickupTime)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.LoggedPickupTime)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Student)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Student.FirstMidName)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Trip)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Trip.ID)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.ID">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>
